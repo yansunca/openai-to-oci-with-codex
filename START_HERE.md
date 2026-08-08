@@ -1,109 +1,69 @@
-# Start Here
+# OCI GenAI Setup Guide
 
-This repo shows how to move a small OpenAI SDK app to OCI's OpenAI-compatible API with the smallest possible code change.
+Complete this setup **after Codex performs the migration in Step 3 of the [main README](README.md)**.
 
-Read order:
-1. `README.md`
-2. `START_HERE.md`
-3. `prompts/migrate-to-oci.md`
+You need:
 
-## What to know
-
-- **OpenAI SDK**: the client library used by the app.
-- **Base URL**: the endpoint the SDK sends requests to.
-- **API key**: the secret used to authenticate.
-- **Model**: the LLM name the app calls.
-
-## What you need
-
-- Python 3.10+
-- an OCI compartment
-- an OCI GenAI API key
-- an OCI OpenAI-compatible base URL
-- a valid OCI model name
-
-## How to get your OCI GenAI values
-
-You need these environment variables:
-
-```bash
+```text
 OCI_GENAI_API_KEY=...
 OCI_OPENAI_BASE_URL=...
 OCI_MODEL=...
 ```
 
-### 1) Get `OCI_GENAI_API_KEY`
+Never commit the real API key or `.env`.
 
-Create an OCI Generative AI API key in the OCI Console.
+## 1. Get `OCI_GENAI_API_KEY`
 
-High-level steps:
-1. Sign in to the OCI Console.
-2. Open **Generative AI**.
-3. Go to **API Keys**.
-4. Click **Create API key**.
-5. Select the compartment for this demo.
-6. Give the key a name.
-7. Create it.
-8. Copy the secret right away and store it securely.
+In the OCI Console:
 
-Do **not** commit the real key to GitHub.
+1. Open **Generative AI**.
+2. Go to **API Keys**.
+3. Create an API key in the compartment used for the demo.
+4. Select the appropriate model/scope access.
+5. Copy the generated secret immediately and store it securely.
 
-### 2) Get `OCI_OPENAI_BASE_URL`
+This is an OCI Generative AI API key, not a normal OCI API signing private key.
 
-Use the OpenAI-compatible OCI endpoint for your region. The pattern is:
+## 2. Get `OCI_OPENAI_BASE_URL`
+
+The endpoint follows:
 
 ```text
-https://inference.generativeai.<REGION>.oci.oraclecloud.com/openai/v1
+https://inference.generativeai.<region>.oci.oraclecloud.com/openai/v1
 ```
 
 Example:
 
-```bash
-OCI_OPENAI_BASE_URL=https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1
+```text
+https://inference.generativeai.us-chicago-1.oci.oraclecloud.com/openai/v1
 ```
 
-### 3) Get `OCI_MODEL`
+Use the region where your selected Generative AI model is available.
 
-Pick a model that is available in your OCI region. The easiest way is to open your OCI Generative AI project or setup page and copy the model name shown in the generated usage example.
+## 3. Get `OCI_MODEL`
 
-Example shape:
+In OCI Generative AI, choose a model available in your selected region. If your project/setup has a **How to use** example, copy the exact model identifier shown there.
 
-```bash
-OCI_MODEL=<model-id-from-your-oci-setup>
-```
-
-## Create your local `.env`
-
-Copy the example file:
+## 4. Create `.env`
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit `.env` so it looks like this:
+Edit it:
 
-```bash
+```text
 OCI_GENAI_API_KEY=<your-secret-api-key>
 OCI_OPENAI_BASE_URL=https://inference.generativeai.<your-region>.oci.oraclecloud.com/openai/v1
 OCI_MODEL=<your-model-id>
 ```
 
-## Verify your settings
-
-Run the verification script before you try the app:
+Check that `.env` is ignored:
 
 ```bash
-python verify_oci.py
+git status --ignored
 ```
 
-It checks that the required variables are present and prints the values in a safe, redacted form.
+## Next Step
 
-## What not to do
-
-- Do not commit secrets.
-- Do not paste API keys into GitHub.
-- Do not rewrite the app if a config change is enough.
-
-## Goal
-
-Run the app once before migration, ask Codex to update the repo, then run it again against OCI.
+Return to the **[main README](README.md)** and continue with **Step 5 — Verify the Real OCI Connection**.

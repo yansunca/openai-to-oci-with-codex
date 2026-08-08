@@ -1,113 +1,146 @@
-# OpenAI to OCI with Codex
+# OpenAI to OCI GenAI with Codex
 
-A small Python demo that shows how an existing OpenAI SDK application can be migrated to OCI's OpenAI-compatible API with minimal code changes.
+Use Codex to migrate an existing application built with the OpenAI SDK to consume OCI Generative AI through OCI's OpenAI-compatible API.
 
-## What this repo demonstrates
+The goal is a **small, understandable migration** rather than rewriting or redeploying the application.
 
-- A tiny app built around the OpenAI Python SDK
-- A Codex migration prompt that updates the app for OCI
-- A clean config swap from OpenAI to OCI
-- A smoke test that proves the app wiring works
-
-## Repo shape
+## What This Demo Shows
 
 ```text
-app.py
-requirements.txt
-.env.example
-.gitignore
-AGENTS.md
-prompts/migrate-to-oci.md
-tests/test_app.py
+Existing OpenAI SDK App
+          ↓
+        Codex
+          ↓
+   Minimal Migration
+          ↓
+OCI OpenAI-Compatible API
+          ↓
+    OCI Generative AI
 ```
 
-## Quick start
+# Demo
+
+## Step 1 — Clone the Repository
 
 ```bash
-python -m venv .venv
+git clone https://github.com/yansunca/openai-to-oci-with-codex.git
+cd openai-to-oci-with-codex
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+## Step 2 — Understand the Starting Application
+
+Open `app.py`. It represents an application already built using the OpenAI Python SDK.
+
+The goal is **not** to rewrite the application. Let Codex determine the smallest reasonable change needed to consume OCI Generative AI through OCI's OpenAI-compatible API.
+
+## Step 3 — Ask Codex to Migrate the Application
+
+Start Codex from the repository and use the **[Codex Migration Prompt](prompts/migrate-to-oci.md)**.
+
+Key requirements:
+
+- preserve the OpenAI SDK and application behavior
+- make the smallest reasonable change
+- move provider-specific settings to environment variables
+- never print or commit credentials
+
+After Codex finishes:
+
+```bash
+git diff
+```
+
+Reviewing this minimal diff is an important part of the demo.
+
+## Step 4 — Configure OCI GenAI
+
+Now configure the OCI Generative AI service that the migrated application will consume.
+
+👉 **[OCI GenAI Setup Guide — START_HERE.md](START_HERE.md)**
+
+The guide walks through obtaining:
+
+```text
+OCI_GENAI_API_KEY
+OCI_OPENAI_BASE_URL
+OCI_MODEL
+```
+
+Then:
+
+```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your OCI values:
+Add your OCI values to `.env`.
 
-```bash
-OCI_GENAI_API_KEY=...
-OCI_OPENAI_BASE_URL=...
-OCI_MODEL=...
-```
+> **Never commit `.env`, API keys, tokens, or other credentials to GitHub.**
 
-Then run the app:
-
-```bash
-python app.py "Hello from OCI"
-```
-
-## How the demo works
-
-1. Start with a normal OpenAI SDK app.
-2. Ask Codex to migrate the repo with the smallest possible diff.
-3. Update the environment variables for OCI.
-4. Run the same app against OCI's OpenAI-compatible endpoint.
-
-## Codex prompt
-
-See `prompts/migrate-to-oci.md`.
-
-## Notes
-
-- Secrets are never committed.
-- The app reads its configuration from environment variables.
-- The tests use mocks so they do not call any external service.
-
-## Testing vs. Real OCI Verification
-
-### Unit tests
-
-Run:
-
-```bash
-pytest
-```
-
-The unit tests use mocks. They **do not call OpenAI, OCI Generative AI, or any other external service**.
-
-This means:
-
-- no OCI credentials are required
-- no model tokens are consumed
-- no OCI GenAI usage is generated
-- the tests are safe to run locally or in GitHub Actions
-
-### Real OCI GenAI verification
-
-After configuring your OCI GenAI credentials and settings, run:
+## Step 5 — Verify the Real OCI Connection
 
 ```bash
 python verify_oci.py
 ```
 
-Unlike the unit tests, this command makes a **real API request**:
+This makes a **real inference request**:
 
 ```text
-Local verify_oci.py
-        |
-        v
+verify_oci.py
+      ↓
 OpenAI Python SDK
-        |
-        v
-OCI OpenAI-compatible API
-        |
-        v
+      ↓
+OCI OpenAI-Compatible API
+      ↓
 OCI Generative AI
-        |
-        v
-Configured model
+      ↓
+Configured Model
 ```
 
-A successful response confirms that the application can consume OCI Generative AI through its OpenAI-compatible API.
+A successful response confirms real OCI GenAI connectivity. Normal OCI GenAI usage and charges may apply.
 
-Because this is a real inference request, normal OCI Generative AI usage and charges may apply.
+## Step 6 — Run the Migrated Application
 
-Never commit your real `OCI_GENAI_API_KEY` or `.env` file to GitHub.
+```bash
+python app.py
+```
+
+```text
+Local Application
+       ↓
+OpenAI SDK
+       ↓
+OCI OpenAI-Compatible API
+       ↓
+OCI Generative AI
+       ↓
+Selected Model
+```
+
+The application remains local. **OCI Generative AI provides the model inference service.**
+
+## Testing
+
+```bash
+pytest
+```
+
+Unit tests use mocks and **do not contact OCI, OpenAI, or any external model service**. They require no OCI credentials and generate no OCI GenAI usage.
+
+`pytest` verifies application behavior. `python verify_oci.py` verifies **real OCI GenAI connectivity**.
+
+## Demo in One Line
+
+**Clone → Codex → Review Diff → Configure OCI → Verify OCI → Run**
+
+## Security
+
+Never commit `.env`, OCI GenAI API keys, OpenAI API keys, OCI private keys, access tokens, or session credentials.
+
+## Why This Matters
+
+Many applications already use the OpenAI SDK. OCI's OpenAI-compatible API provides a familiar programming interface, while Codex can help automate migration work.
+
+**Existing OpenAI application + Codex migration + OCI GenAI consumption.**
