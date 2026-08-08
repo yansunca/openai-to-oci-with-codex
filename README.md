@@ -21,6 +21,10 @@ prompts/migrate-to-oci.md
 tests/test_app.py
 ```
 
+## New to OpenAI or OCI GenAI?
+
+Start with `START_HERE.md` for a short, plain-English overview before you run the demo.
+
 ## Quick start
 
 ```bash
