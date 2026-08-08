@@ -17,6 +17,8 @@ requirements.txt
 .env.example
 .gitignore
 AGENTS.md
+START_HERE.md
+verify_oci.py
 prompts/migrate-to-oci.md
 tests/test_app.py
 ```
@@ -40,6 +42,12 @@ Edit `.env` with your OCI values:
 OCI_GENAI_API_KEY=...
 OCI_OPENAI_BASE_URL=...
 OCI_MODEL=...
+```
+
+Then check your settings:
+
+```bash
+python verify_oci.py
 ```
 
 Then run the app:
