@@ -1,6 +1,6 @@
 # OpenAI to OCI GenAI with Codex
 
-Use Codex to migrate an existing application built with the OpenAI SDK to consume OCI Generative AI through OCI's OpenAI-compatible API.
+Use Codex to migrate an existing application built with the OpenAI SDK to work with OCI Generative AI through OCI's OpenAI-compatible API.
 
 The goal is a **small, understandable migration** rather than rewriting or redeploying the application.
 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 Open `app.py`. It represents an application already built using the OpenAI Python SDK.
 
-The goal is **not** to rewrite the application. Let Codex determine the smallest reasonable change needed to consume OCI Generative AI through OCI's OpenAI-compatible API.
+The goal is **not** to rewrite the application. Let Codex determine the smallest reasonable change needed to work with OCI Generative AI through OCI's OpenAI-compatible API.
 
 ## Step 3 — Ask Codex to Migrate the Application
 
@@ -143,4 +143,4 @@ Never commit `.env`, OCI GenAI API keys, OpenAI API keys, OCI private keys, acce
 
 Many applications already use the OpenAI SDK. OCI's OpenAI-compatible API provides a familiar programming interface, while Codex can help automate migration work.
 
-**Existing OpenAI application + Codex migration + OCI GenAI consumption.**
+**Existing OpenAI application + Codex migration + OCI Generative AI.**
