@@ -1,31 +1,28 @@
 from __future__ import annotations
 
-import os
-import sys
 from dataclasses import dataclass
 from typing import Any, Optional
+
+from openai import OpenAI
 
 
 @dataclass(frozen=True)
 class AppConfig:
     api_key: str
-    base_url: str
     model: str
-    timeout_seconds: int = 60
 
 
 def load_config() -> AppConfig:
-    api_key = os.environ.get("OCI_GENAI_API_KEY", "").strip()
-    base_url = os.environ.get("OCI_OPENAI_BASE_URL", "").strip()
-    model = os.environ.get("OCI_MODEL", "").strip()
-    timeout_raw = os.environ.get("OCI_TIMEOUT_SECONDS", "60").strip()
+    import os
+
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    model = os.environ.get("OPENAI_MODEL", "").strip()
 
     missing = [
         name
         for name, value in [
-            ("OCI_GENAI_API_KEY", api_key),
-            ("OCI_OPENAI_BASE_URL", base_url),
-            ("OCI_MODEL", model),
+            ("OPENAI_API_KEY", api_key),
+            ("OPENAI_MODEL", model),
         ]
         if not value
     ]
@@ -34,27 +31,11 @@ def load_config() -> AppConfig:
             "Missing required environment variables: " + ", ".join(missing)
         )
 
-    try:
-        timeout_seconds = int(timeout_raw)
-    except ValueError as exc:
-        raise RuntimeError("OCI_TIMEOUT_SECONDS must be an integer") from exc
-
-    return AppConfig(
-        api_key=api_key,
-        base_url=base_url,
-        model=model,
-        timeout_seconds=timeout_seconds,
-    )
+    return AppConfig(api_key=api_key, model=model)
 
 
 def build_client(config: AppConfig) -> Any:
-    from openai import OpenAI
-
-    return OpenAI(
-        api_key=config.api_key,
-        base_url=config.base_url,
-        timeout=config.timeout_seconds,
-    )
+    return OpenAI(api_key=config.api_key)
 
 
 def ask(question: str, *, config: Optional[AppConfig] = None) -> str:
@@ -78,14 +59,16 @@ def ask(question: str, *, config: Optional[AppConfig] = None) -> str:
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        print("Usage: python app.py <question>", file=sys.stderr)
-        return 2
+        print("Usage: python app.py <question>")
+        return 1
 
-    question = " ".join(argv[1:]).strip()
+    question = " ".join(argv[1:])
     answer = ask(question)
     print(answer)
     return 0
 
 
 if __name__ == "__main__":
+    import sys
+
     raise SystemExit(main(sys.argv))

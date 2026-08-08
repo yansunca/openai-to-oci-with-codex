@@ -27,25 +27,19 @@ class FakeClient:
 
 
 def test_load_config(monkeypatch):
-    monkeypatch.setenv("OCI_GENAI_API_KEY", "key")
-    monkeypatch.setenv("OCI_OPENAI_BASE_URL", "https://example.test")
-    monkeypatch.setenv("OCI_MODEL", "demo-model")
-    monkeypatch.setenv("OCI_TIMEOUT_SECONDS", "30")
+    monkeypatch.setenv("OPENAI_API_KEY", "key")
+    monkeypatch.setenv("OPENAI_MODEL", "demo-model")
 
     cfg = demo_app.load_config()
 
     assert cfg.api_key == "key"
-    assert cfg.base_url == "https://example.test"
     assert cfg.model == "demo-model"
-    assert cfg.timeout_seconds == 30
 
 
 def test_ask_uses_client(monkeypatch):
     cfg = demo_app.AppConfig(
         api_key="key",
-        base_url="https://example.test",
         model="demo-model",
-        timeout_seconds=45,
     )
 
     fake_client = FakeClient()
@@ -62,9 +56,8 @@ def test_ask_uses_client(monkeypatch):
 
 
 def test_load_config_rejects_missing_values(monkeypatch):
-    monkeypatch.delenv("OCI_GENAI_API_KEY", raising=False)
-    monkeypatch.delenv("OCI_OPENAI_BASE_URL", raising=False)
-    monkeypatch.delenv("OCI_MODEL", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
 
     try:
         demo_app.load_config()

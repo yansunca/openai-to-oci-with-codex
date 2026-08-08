@@ -119,7 +119,7 @@ OCI Generative AI
 Selected Model
 ```
 
-The application remains local. **OCI Generative AI provides the model inference service.**
+The application remains local. **After migration, OCI Generative AI provides the model inference service.**
 
 ## Testing
 
