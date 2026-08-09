@@ -47,6 +47,8 @@ Key requirements:
 - move provider-specific settings to environment variables
 - never print or commit credentials
 
+Codex should also create `verify_oci.py` as a real OCI connectivity check and update `.env.example` with OCI placeholders.
+
 After Codex finishes:
 
 ```bash
@@ -80,6 +82,8 @@ Add your OCI values to `.env`.
 > **Never commit `.env`, API keys, tokens, or other credentials to GitHub.**
 
 ## Step 5 — Verify the Real OCI Connection
+
+Codex creates `verify_oci.py` during Step 3. Run the generated script:
 
 ```bash
 python verify_oci.py
@@ -129,7 +133,7 @@ pytest
 
 Unit tests use mocks and **do not contact OCI, OpenAI, or any external model service**. They require no OCI credentials and generate no OCI GenAI usage.
 
-`pytest` verifies application behavior. `python verify_oci.py` verifies **real OCI GenAI connectivity**.
+`pytest` verifies application behavior. The Codex-generated `python verify_oci.py` verifies **real OCI GenAI connectivity**.
 
 ## Demo in One Line
 
