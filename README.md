@@ -1,150 +1,107 @@
 # OpenAI to OCI GenAI with Codex
 
-Use Codex to migrate an existing application built with the OpenAI SDK to work with OCI Generative AI through OCI's OpenAI-compatible API.
+Use Codex to adapt an existing OpenAI SDK application to OCI Generative AI through OCI's OpenAI-compatible API.
 
-The goal is a **small, understandable migration** rather than rewriting or redeploying the application.
+The starting application contains no OCI-specific application code. Codex performs the OCI-specific changes while preserving the OpenAI SDK and Responses API.
 
-## What This Demo Shows
+## Demo Flow
 
 ```text
 Existing OpenAI SDK App
           ↓
-        Codex
+     Codex in VS Code
           ↓
-   Minimal Migration
+     Review Git Diff
           ↓
-OCI OpenAI-Compatible API
+ Configure OCI GenAI
           ↓
-    OCI Generative AI
+ Verify and Run
 ```
 
-# Demo
-
-## Step 1 — Clone the Repository
+## Step 1 — Clone and Set Up
 
 ```bash
 git clone https://github.com/yansunca/openai-to-oci-with-codex.git
 cd openai-to-oci-with-codex
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ## Step 2 — Understand the Starting Application
+Open `app.py`. It is intentionally a standard OpenAI Python SDK application. The goal is not to preconfigure OCI or rewrite the app.
 
-Open `app.py`. It represents an application already built using the OpenAI Python SDK.
+## Step 3 — Migrate with Codex in VS Code
+Open the repository folder in **Visual Studio Code** with Codex enabled.
 
-The goal is **not** to rewrite the application. Let Codex determine the smallest reasonable change needed to work with OCI Generative AI through OCI's OpenAI-compatible API.
+Ask Codex:
 
-## Step 3 — Ask Codex to Migrate the Application
+> Read `prompts/migrate-to-oci.md` and perform the migration described there.
 
-Start Codex from the repository and use the **[Codex Migration Prompt](prompts/migrate-to-oci.md)**.
+See the full **[Codex Migration Prompt](prompts/migrate-to-oci.md)**.
 
-Key requirements:
+Codex should preserve the OpenAI SDK and Responses API, add the OCI configuration required by the Responses API (including OCI Generative AI Project configuration), update `.env.example`, generate `verify_oci.py`, update dependencies if necessary, and keep unit tests mocked.
 
-- preserve the OpenAI SDK and application behavior
-- make the smallest reasonable change
-- move provider-specific settings to environment variables
-- never print or commit credentials
-
-Codex should also create `verify_oci.py` as a real OCI connectivity check and update `.env.example` with OCI placeholders.
-
-After Codex finishes:
+After Codex finishes, review the changes in VS Code Source Control or run:
 
 ```bash
 git diff
 ```
 
-Reviewing this minimal diff is an important part of the demo.
+If `requirements.txt` changed:
 
-## Step 4 — Configure OCI GenAI
+```bash
+python -m pip install -r requirements.txt
+```
 
-Now configure the OCI Generative AI service that the migrated application will consume.
+## Step 4 — Configure OCI Generative AI
+👉 **[Configure your OCI GenAI API key, endpoint, Project and model — START_HERE.md](START_HERE.md)**
 
-👉 **[OCI GenAI Setup Guide — START_HERE.md](START_HERE.md)**
-
-The guide walks through obtaining:
+The migrated configuration uses:
 
 ```text
 OCI_GENAI_API_KEY
 OCI_OPENAI_BASE_URL
+OCI_GENAI_PROJECT_ID
 OCI_MODEL
 ```
 
-Then:
+Keep real credentials in local `.env`; never commit it.
 
-```bash
-cp .env.example .env
-```
-
-Add your OCI values to `.env`.
-
-> **Never commit `.env`, API keys, tokens, or other credentials to GitHub.**
+`OCI_MODEL` is region-specific. The setup guide explains how to confirm a supported model for your active OCI region/Project and copy its exact model ID. Codex should not guess the model ID.
 
 ## Step 5 — Verify the Real OCI Connection
-
-Codex creates `verify_oci.py` during Step 3. Run the generated script:
+Codex generates `verify_oci.py` during migration.
 
 ```bash
 python verify_oci.py
 ```
 
-This makes a **real inference request**:
-
-```text
-verify_oci.py
-      ↓
-OpenAI Python SDK
-      ↓
-OCI OpenAI-Compatible API
-      ↓
-OCI Generative AI
-      ↓
-Configured Model
-```
-
-A successful response confirms real OCI GenAI connectivity. Normal OCI GenAI usage and charges may apply.
+This makes a real request through the OpenAI Python SDK to OCI's OpenAI-compatible API. A successful response confirms the migrated configuration can reach OCI Generative AI.
 
 ## Step 6 — Run the Migrated Application
 
 ```bash
-python app.py
+python app.py "Why does API compatibility matter?"
 ```
 
-```text
-Local Application
-       ↓
-OpenAI SDK
-       ↓
-OCI OpenAI-Compatible API
-       ↓
-OCI Generative AI
-       ↓
-Selected Model
-```
-
-The application remains local. **After migration, OCI Generative AI provides the model inference service.**
+The application remains local; OCI Generative AI provides the model service through its OpenAI-compatible API.
 
 ## Testing
 
 ```bash
-pytest
+python -m pytest
 ```
 
-Unit tests use mocks and **do not contact OCI, OpenAI, or any external model service**. They require no OCI credentials and generate no OCI GenAI usage.
-
-`pytest` verifies application behavior. The Codex-generated `python verify_oci.py` verifies **real OCI GenAI connectivity**.
+Unit tests use mocks and do not contact OCI, OpenAI, or any external model service.
 
 ## Demo in One Line
-
-**Clone → Codex → Review Diff → Configure OCI → Verify OCI → Run**
+**Clone → VS Code → Codex → Review Diff → Configure OCI → Verify → Run**
 
 ## Security
-
-Never commit `.env`, OCI GenAI API keys, OpenAI API keys, OCI private keys, access tokens, or session credentials.
+Never commit `.env`, API keys, OCI private keys, access tokens, or session credentials.
 
 ## Why This Matters
+Many applications already use the OpenAI SDK. OCI's OpenAI-compatible API provides a familiar programming interface, while Codex can help automate the migration work.
 
-Many applications already use the OpenAI SDK. OCI's OpenAI-compatible API provides a familiar programming interface, while Codex can help automate migration work.
-
-**Existing OpenAI application + Codex migration + OCI Generative AI.**
+**Existing OpenAI application + Codex-assisted migration + OCI Generative AI.**
