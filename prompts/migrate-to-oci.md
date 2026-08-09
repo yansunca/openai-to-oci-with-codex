@@ -9,49 +9,71 @@ Migrate it to work with **OCI Generative AI through OCI's OpenAI-compatible API*
 - the Responses API (`client.responses.create(...)`)
 - the application's behavior
 
-## OCI configuration
-Determine and implement all OCI-specific configuration required for the OCI OpenAI-compatible Responses API.
+## OCI Authentication
+
+Use OCI IAM user-principal authentication.
+
+Configure the OpenAI client to use OCI request signing through `oci-openai`, with the user's OCI CLI profile from `~/.oci/config` and the `DEFAULT` profile unless another profile is explicitly selected.
+
+The migrated application and verifier should use:
+- the OpenAI Python SDK
+- `httpx`
+- `oci-openai`
+- OCI request signing via user-principal authentication
+
+Keep the Responses API flow intact and preserve the OpenAI SDK as the client library.
+
+## OCI Configuration
 
 Use environment variables for:
-- `OCI_GENAI_API_KEY`
 - `OCI_OPENAI_BASE_URL`
 - `OCI_GENAI_PROJECT_ID`
 - `OCI_MODEL`
+- `OCI_CONFIG_PROFILE`
 
-Configure the OpenAI client with the OCI Generative AI Project so the required project information is sent with Responses API requests.
+Configure the OpenAI client with the OCI Generative AI Project required by the Responses API.
 
-Do not hard-code API keys, Project OCIDs, endpoints, model IDs, or other customer-specific values. Update `.env.example` with safe placeholders for every required post-migration setting.
+Do not hard-code Project OCIDs, endpoints, model IDs, OCI config contents, fingerprints, private-key paths, or other customer-specific values.
 
-Do **not** invent, guess, or select an OCI model ID. Model availability is region-specific. The user must supply `OCI_MODEL` after confirming an available model in their OCI region/Project (for example from the Project's **How to use** sample or Oracle's regional model-availability documentation).
+Model availability is region-specific. Do not invent or guess `OCI_MODEL`; the user supplies a model confirmed for the selected OCI region/Project, preferably from the Project's **How to use** sample.
+
+Update `.env.example` with safe placeholders for the required post-migration configuration.
+
+## Dependencies
+
+Add the dependencies required by the generated migration to `requirements.txt`, while preserving the OpenAI SDK dependency.
 
 ## Verification
-Generate `verify_oci.py` that:
-- uses the standard OpenAI Python SDK
-- uses the Responses API
-- reads OCI configuration from normal process environment variables using `os.environ`
-- includes the OCI Generative AI Project configuration required by the Responses API
-- does not load or parse `.env` itself; the shell is responsible for exporting `.env` values before the app/verifier runs
-- makes one small real OCI request
-- prints a clear success message and model response
-- never prints credentials
 
-Do not add `python-dotenv` just for configuration loading. Keep configuration behavior consistent between `app.py` and `verify_oci.py`: both read normal process environment variables.
+Generate `verify_oci_iam.py` that:
+- uses the standard OpenAI Python SDK
+- uses OCI IAM user-principal authentication
+- uses the configured OCI CLI profile
+- reads endpoint, Project OCID, and model from normal process environment variables
+- uses the Responses API
+- makes one small real request
+- prints a clear success message and model response
+- never prints OCI credentials, signing-key material, or OCI config contents
+
+The application and verifier should read normal process environment variables. They should not parse `.env` directly; the shell exports `.env` values before execution.
 
 ## Tests
-Keep unit tests mocked. They must not contact OpenAI, OCI, or any external service. Update tests only as necessary.
+
+Keep unit tests mocked and free of external API calls. Update tests only as necessary.
 
 ## Do not do
-- do not replace the OpenAI SDK with the OCI SDK
+- do not replace the OpenAI SDK with the OCI SDK as the model client
 - do not add Terraform, containers, OKE, Vault, networking, or deployment resources
 - do not redesign the application
-- do not print, copy, commit, or expose secrets or `.env` contents
+- do not expose `~/.oci/config`, OCI private keys, API keys, tokens, `.env` contents, or other credentials
 
 ## Validation
+
 After migration:
-1. install newly required dependencies
-2. run the mocked unit tests
-3. show the resulting `git diff`
+1. install final dependencies
+2. run mocked unit tests
+3. show `git diff`
 4. summarize files changed or added
 5. explain why each change was necessary
 
-If real OCI credentials are unavailable, do not fabricate values or claim live verification succeeded.
+If valid OCI IAM credentials are unavailable, do not fabricate values or claim live verification succeeded.

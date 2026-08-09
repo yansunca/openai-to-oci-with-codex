@@ -13,9 +13,9 @@ Existing OpenAI SDK App
           ↓
      Review Git Diff
           ↓
- Configure OCI GenAI
+ OCI IAM + GenAI Setup
           ↓
- Verify and Run
+     Verify and Run
 ```
 
 ## Step 1 — Clone the Repository
@@ -28,20 +28,20 @@ cd openai-to-oci-with-codex
 Open the repository folder in **Visual Studio Code**.
 
 ## Step 2 — Understand the Starting Application
-Open `app.py`. It is intentionally a standard OpenAI Python SDK application. The goal is not to preconfigure OCI or rewrite the app.
+
+Open `app.py`. It is intentionally a standard OpenAI Python SDK application.
 
 ## Step 3 — Migrate with Codex in VS Code
-Open the repository folder in **Visual Studio Code** with Codex enabled.
 
-Ask Codex:
+Open Codex in VS Code and ask:
 
 > Read `prompts/migrate-to-oci.md` and perform the migration described there.
 
 See the full **[Codex Migration Prompt](prompts/migrate-to-oci.md)**.
 
-Codex should preserve the OpenAI SDK and Responses API, add the OCI configuration required by the Responses API (including OCI Generative AI Project configuration), update `.env.example`, generate `verify_oci.py`, update dependencies if necessary, and keep unit tests mocked.
+Codex should preserve the OpenAI SDK and Responses API, add OCI IAM request signing, add OCI Project/endpoint/model configuration, update `.env.example`, generate `verify_oci_iam.py`, update dependencies, and keep unit tests mocked.
 
-After Codex finishes, review the changes in VS Code Source Control or run:
+Review the changes:
 
 ```bash
 git diff
@@ -49,31 +49,32 @@ git diff
 
 ## Step 4 — Set Up the Migrated Application
 
-After reviewing the Codex-generated changes, create a virtual environment and install the **final migrated dependencies**:
-
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-Codex may add migration-specific dependencies to `requirements.txt`, so dependencies are installed **after the migration**.
+Dependencies are installed after migration because Codex may update `requirements.txt`.
 
-## Step 5 — Configure OCI Generative AI
-👉 **[Configure your OCI GenAI API key, endpoint, Project and model — START_HERE.md](START_HERE.md)**
+## Step 5 — Configure OCI
 
-The migrated configuration uses:
+This POC uses **OCI IAM user-principal authentication** with your standard OCI CLI profile.
+
+👉 **[Configure OCI IAM, endpoint, Project and model — START_HERE.md](START_HERE.md)**
+
+The migrated application uses:
 
 ```text
-OCI_GENAI_API_KEY
 OCI_OPENAI_BASE_URL
 OCI_GENAI_PROJECT_ID
 OCI_MODEL
+OCI_CONFIG_PROFILE
 ```
 
-Keep real credentials in local `.env`; never commit it.
+Authentication comes from `~/.oci/config`; OCI credentials and private keys stay outside this repository. The profile name is read from `OCI_CONFIG_PROFILE` and defaults to `DEFAULT`.
 
-Before running the verifier or migrated application, export the `.env` values into your shell:
+After creating `.env`:
 
 ```bash
 set -a
@@ -81,26 +82,35 @@ source .env
 set +a
 ```
 
-Both `app.py` and the Codex-generated `verify_oci.py` read normal process environment variables. They do not load `.env` themselves.
-
-`OCI_MODEL` is region-specific. The setup guide explains how to confirm a supported model for your active OCI region/Project and copy its exact model ID. Codex should not guess the model ID.
+Set `OCI_CONFIG_PROFILE` in `.env` if you want to use a profile other than `DEFAULT`.
 
 ## Step 6 — Verify the Real OCI Connection
-Codex generates `verify_oci.py` during migration. After loading `.env` into your shell as shown in Step 5, run:
+
+Codex generates `verify_oci_iam.py` during migration.
 
 ```bash
-python verify_oci.py
+python verify_oci_iam.py
 ```
 
-This makes a real request through the OpenAI Python SDK to OCI's OpenAI-compatible API. A successful response confirms the migrated configuration can reach OCI Generative AI.
+The real request path is:
+
+```text
+OpenAI Python SDK
+       ↓
+OCI IAM request signing
+       ↓
+OCI OpenAI-Compatible API
+       ↓
+OCI Generative AI
+```
+
+A successful response confirms the migrated OpenAI SDK configuration can reach OCI Generative AI using your OCI IAM identity.
 
 ## Step 7 — Run the Migrated Application
 
 ```bash
 python app.py "Why does API compatibility matter?"
 ```
-
-The application remains local; OCI Generative AI provides the model service through its OpenAI-compatible API.
 
 ## Testing
 
@@ -111,12 +121,15 @@ python -m pytest
 Unit tests use mocks and do not contact OCI, OpenAI, or any external model service.
 
 ## Demo in One Line
-**Clone → VS Code → Codex → Review Diff → Install → Configure OCI → Verify → Run**
+
+**Clone → VS Code → Codex → Review Diff → Install → Configure OCI IAM → Verify → Run**
 
 ## Security
-Never commit `.env`, API keys, OCI private keys, access tokens, or session credentials.
+
+Never commit `.env`, `~/.oci/config`, OCI private keys, API keys, access tokens, or session credentials.
 
 ## Why This Matters
+
 Many applications already use the OpenAI SDK. OCI's OpenAI-compatible API provides a familiar programming interface, while Codex can help automate the migration work.
 
 **Existing OpenAI application + Codex-assisted migration + OCI Generative AI.**
