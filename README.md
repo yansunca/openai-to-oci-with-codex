@@ -73,10 +73,20 @@ OCI_MODEL
 
 Keep real credentials in local `.env`; never commit it.
 
+Before running the verifier or migrated application, export the `.env` values into your shell:
+
+```bash
+set -a
+source .env
+set +a
+```
+
+Both `app.py` and the Codex-generated `verify_oci.py` read normal process environment variables. They do not load `.env` themselves.
+
 `OCI_MODEL` is region-specific. The setup guide explains how to confirm a supported model for your active OCI region/Project and copy its exact model ID. Codex should not guess the model ID.
 
 ## Step 6 — Verify the Real OCI Connection
-Codex generates `verify_oci.py` during migration.
+Codex generates `verify_oci.py` during migration. After loading `.env` into your shell as shown in Step 5, run:
 
 ```bash
 python verify_oci.py

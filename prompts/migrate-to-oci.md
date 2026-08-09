@@ -28,13 +28,14 @@ Do **not** invent, guess, or select an OCI model ID. Model availability is regio
 Generate `verify_oci.py` that:
 - uses the standard OpenAI Python SDK
 - uses the Responses API
-- loads OCI configuration from environment variables / local `.env`
+- reads OCI configuration from normal process environment variables using `os.environ`
 - includes the OCI Generative AI Project configuration required by the Responses API
+- does not load or parse `.env` itself; the shell is responsible for exporting `.env` values before the app/verifier runs
 - makes one small real OCI request
 - prints a clear success message and model response
 - never prints credentials
 
-If the verifier requires an additional Python package, add it to `requirements.txt`.
+Do not add `python-dotenv` just for configuration loading. Keep configuration behavior consistent between `app.py` and `verify_oci.py`: both read normal process environment variables.
 
 ## Tests
 Keep unit tests mocked. They must not contact OpenAI, OCI, or any external service. Update tests only as necessary.
